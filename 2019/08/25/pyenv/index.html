@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="python,pyenv,">
 
 
 
@@ -79,13 +79,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Fanyang&#39;s Blog">
-<meta property="og:url" content="http://fanyangkong.github.io/index.html">
+<meta name="description" content="[TOC] Mac系统PythonMac系统出厂时安装的Python位于12## 使用pyenv管理Python网上的解决方案有很多，权衡之下选择了使用[pyenv](https://github.com/pyenv/pyenv)来进行多版本的管理。pyenv是一个GitHub上的开源工具，使用非常轻量化的方式进行多Python版本的管理与切换，不同Python版本的依赖库独立安装，可以创建全局的">
+<meta name="keywords" content="python,pyenv">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac系统使用pyenv进行多Python环境配置">
+<meta property="og:url" content="http://fanyangkong.github.io/2019/08/25/pyenv/index.html">
 <meta property="og:site_name" content="Fanyang&#39;s Blog">
+<meta property="og:description" content="[TOC] Mac系统PythonMac系统出厂时安装的Python位于12## 使用pyenv管理Python网上的解决方案有很多，权衡之下选择了使用[pyenv](https://github.com/pyenv/pyenv)来进行多版本的管理。pyenv是一个GitHub上的开源工具，使用非常轻量化的方式进行多Python版本的管理与切换，不同Python版本的依赖库独立安装，可以创建全局的">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-08-25T04:31:19.624Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Fanyang&#39;s Blog">
+<meta name="twitter:title" content="Mac系统使用pyenv进行多Python环境配置">
+<meta name="twitter:description" content="[TOC] Mac系统PythonMac系统出厂时安装的Python位于12## 使用pyenv管理Python网上的解决方案有很多，权衡之下选择了使用[pyenv](https://github.com/pyenv/pyenv)来进行多版本的管理。pyenv是一个GitHub上的开源工具，使用非常轻量化的方式进行多Python版本的管理与切换，不同Python版本的依赖库独立安装，可以创建全局的">
 
 
 
@@ -115,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://fanyangkong.github.io/">
+  <link rel="canonical" href="http://fanyangkong.github.io/2019/08/25/pyenv/">
 
 
 
 
 
-  <title>Fanyang's Blog</title>
+  <title>Mac系统使用pyenv进行多Python环境配置 | Fanyang's Blog</title>
   
 
 
@@ -140,8 +145,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -234,9 +238,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -266,9 +270,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/25/pyenv/" itemprop="url">Mac系统使用pyenv进行多Python环境配置</a></h1>
+          <h1 class="post-title" itemprop="name headline">Mac系统使用pyenv进行多Python环境配置</h1>
         
 
         <div class="post-meta">
@@ -340,9 +342,7 @@
       
 
       
-        
-          
-            <p>[TOC]</p>
+        <p>[TOC]</p>
 <h2 id="Mac系统Python"><a href="#Mac系统Python" class="headerlink" title="Mac系统Python"></a>Mac系统Python</h2><p>Mac系统出厂时安装的Python位于<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">## 使用pyenv管理Python</span><br><span class="line">网上的解决方案有很多，权衡之下选择了使用[pyenv](https://github.com/pyenv/pyenv)来进行多版本的管理。pyenv是一个GitHub上的开源工具，使用非常轻量化的方式进行多Python版本的管理与切换，不同Python版本的依赖库独立安装，可以创建全局的Python版本与局部的Python版本以及Shell的Python版本，切换版本非常方便。它的GitHub首页有用法的详细介绍，之所以说它轻量，是因为它通过修改环境变量的方式进行Python环境的切换。pyenv会在环境变量的起始位置插入一个垫片</span><br></pre></td></tr></table></figure></p>
 <p>$(pyenv root)/shims:/usr/local/bin:/usr/bin:/bin<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">具体Python版本的选择是通过垫片路径下的同名python程序结合当前路径下的```.python-version```文件内的版本号进行选择的。</span><br><span class="line"></span><br><span class="line">## pyenv的安装</span><br><span class="line">本文推荐采用[homebrew](https://brew.sh/)安装pyenv的方式，homebrew以简化的方式安装Mac系统上缺少的安装包。在Mac终端中执行以下ruby的命令来进行homebrew的安装,如果命令失效可以去homebrew的官网首页查看最新的命令。</span><br></pre></td></tr></table></figure></p>
 <p>/usr/bin/ruby -e “$(curl -fsSL <a href="https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;" target="_blank" rel="noopener">https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">安装完成后建议切换为国内的源以便提高下载速度（切换后首次更新可能需要几分钟），以下选择切换成中科大的源：</span><br><span class="line"></span><br><span class="line">**步骤一**</span><br></pre></td></tr></table></figure></p>
@@ -365,8 +365,6 @@
 <p>其中pyenv安装的Python路径通常为<code>~/.pyenv/versions/</code>，在其中选择和终端一致的版本就可以了。</p>
 <h2 id="虚拟环境"><a href="#虚拟环境" class="headerlink" title="虚拟环境"></a>虚拟环境</h2><p>pyenv有非常优秀的插件pyenv-virtualenv实现虚拟环境，不过本次没有用到，后续使用了再进行补充</p>
 
-          
-        
       
     </div>
     
@@ -381,316 +379,38 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://fanyangkong.github.io/2016/04/01/Android-Handler/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fanyangkong">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/10181034?s=460&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fanyang's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/01/Android-Handler/" itemprop="url">Handler实现的源码分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T22:09:09+08:00">
-                2016-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index">
-                    <span itemprop="name">Android</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/python/" rel="tag"># python</a>
           
-
+            <a href="/tags/pyenv/" rel="tag"># pyenv</a>
           
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <p>Android提供了<code>Handler</code>在子线程中更新UI，本篇博客想从<code>Handler</code>相关的几个类的源码来分析<code>Handler</code>与<code>MessageQueue</code>以及<code>Looper</code>之间的关系，不介绍<code>Handler</code>的基本用法。<br><strong>PS:</strong>本文是在反复阅读了《Android开发艺术探索》以及《Android开发进阶:从小工到专家》相关章节之后结合自己对源代码的分析写的，感觉直接分析类可能会更容易理解。本文中的类只列出了与本文分析相关的成员变量以及方法等，无关的代码选择了省略。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/04/01/Android-Handler/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/01/Android-Handler/" rel="next" title="Handler实现的源码分析">
+                <i class="fa fa-chevron-left"></i> Handler实现的源码分析
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </p></div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://fanyangkong.github.io/2016/03/29/Java-Enum/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fanyangkong">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/10181034?s=460&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Fanyang's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/03/29/Java-Enum/" itemprop="url">Java枚举类</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-29T21:24:06+08:00">
-                2016-03-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <h2 id="Java-Enum介绍"><a href="#Java-Enum介绍" class="headerlink" title="Java Enum介绍"></a>Java Enum介绍</h2><p>Enum类是jdk1.5中引入的类型，枚举类有7钟常见的用法：</p>
-<ul>
-<li>常量</li>
-<li>switch</li>
-<li>向枚举类中添加方法</li>
-<li>复写枚举类中的方法</li>
-<li>实现接口</li>
-<li>使用接口组织枚举</li>
-<li>枚举集合</li>
-</ul>
-<p>这部分网上教程很多，以后有时间详细更新<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/03/29/Java-Enum/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </p></div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -700,10 +420,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -711,6 +432,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -731,8 +456,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -804,6 +538,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mac系统Python"><span class="nav-number">1.</span> <span class="nav-text">Mac系统Python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟环境"><span class="nav-number">2.</span> <span class="nav-text">虚拟环境</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -944,6 +694,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
