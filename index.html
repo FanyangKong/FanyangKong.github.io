@@ -341,7 +341,7 @@
 
       
         
-          <h2 id="Mac系统Python"><a href="#Mac系统Python" class="headerlink" title="Mac系统Python"></a>Mac系统Python</h2><p>Mac系统出厂时安装的Python位于 <code>/Library/Frameworks/Python.framework/</code> 目录下，本人的Mac系统版本为10.14.4，系统自带的Python版本有2.3，2.5，2.6，2.7，并且默认使用的版本为2.7，直接使用系统的Python有很多问题，比如在依赖下载等场景需要使用<code>sudo</code>命令，而且系统软件对系统版本的Python有依赖，随便更改系统的Python非常不优雅，当需要多个版本的Python时使用系统Python会非常混乱。</p>
+          <h2 id="Mac系统Python"><a href="#Mac系统Python" class="headerlink" title="Mac系统Python"></a>Mac系统Python</h2><p>Mac系统出厂时安装的Python位于 <code>/System/Library/Frameworks/Python.framework/</code> 目录下，本人的Mac系统版本为10.14.4，系统自带的Python版本有2.3，2.5，2.6，2.7，并且默认使用的版本为2.7，直接使用系统的Python有很多问题，比如在依赖下载等场景需要使用<code>sudo</code>命令，而且系统软件对系统版本的Python有依赖，随便更改系统的Python非常不优雅，当需要多个版本的Python时使用系统Python会非常混乱。</p>
 <h2 id="使用pyenv管理Python"><a href="#使用pyenv管理Python" class="headerlink" title="使用pyenv管理Python"></a>使用pyenv管理Python</h2><p>网上的解决方案有很多，权衡之下选择了使用<a href="https://github.com/pyenv/pyenv" target="_blank" rel="noopener">pyenv</a>来进行多版本的管理。pyenv是一个GitHub上的开源工具，使用非常轻量化的方式进行多Python版本的管理与切换，不同Python版本的依赖库独立安装，可以创建全局的Python版本与局部的Python版本以及Shell的Python版本，切换版本非常方便。
           <!--noindex-->
           <div class="post-button text-center">
