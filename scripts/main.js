@@ -2518,7 +2518,7 @@ var SidebarMeta = /*#__PURE__*/function () {
 
     this._subscribe();
 
-    this._fetchInfo();
+    // this._fetchInfo();
 
     this._bindOtherClick();
   } // add a new tab and updata all metas
