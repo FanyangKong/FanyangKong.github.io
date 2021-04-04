@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.8.0">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+
+    
+
+    
+        <meta name="description" content="一、Android焦点简介与Android移动端触控交互方式不同，Android TV平台与用户的交互更多依赖遥控器加系统焦点来完成。焦点是Android系统对用户当前正在操作的可交互视图的一种标记，通常被焦点标记的视图通常都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，用户可以使用遥控器方向键将界面上不同的可交互视图标记为焦点。TV平台的APP开发维护无时无刻不在与焦点打交道，所以本文分析下源码中关于焦点流转，焦点状态变化相关的代码。">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="fanyangkong">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="Android焦点搜索源码分析">
+    
+
+    <!--Open Graph Description-->
+    
+        <meta property="og:description" content="一、Android焦点简介与Android移动端触控交互方式不同，Android TV平台与用户的交互更多依赖遥控器加系统焦点来完成。焦点是Android系统对用户当前正在操作的可交互视图的一种标记，通常被焦点标记的视图通常都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，用户可以使用遥控器方向键将界面上不同的可交互视图标记为焦点。TV平台的APP开发维护无时无刻不在与焦点打交道，所以本文分析下源码中关于焦点流转，焦点状态变化相关的代码。">
+    
+
+    <!--Open Graph Site Name-->
+        <meta property="og:site_name" content="Fanyang&#39;s Blog">
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article">
+    
+
+    <!--Page Cover-->
+    
+    
+        <meta property="og:image" content="http://fanyangkong.github.ioimg/home-bg.jpg">
+    
+
+        <meta name="twitter:card" content="summary_large_image">
+
+    
+
+    
+        <meta name="twitter:image" content="http://fanyangkong.github.ioimg/home-bg.jpg">
+    
+
+    <!-- Title -->
+    
+    <title>Android焦点搜索源码分析 - Fanyang&#39;s Blog</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Gallery -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.css" type="text/css" rel="stylesheet">
+
+    <!-- Google Analytics -->
+    
+
+
+    <!-- favicon -->
+    
+
+</head>
+
+
+<body>
+
+    <!-- Menu -->
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">孔凡阳的个人博客</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                
+                    <li>
+                        <a href="/">
+                            
+                                Home
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/archives">
+                            
+                                Archives
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/tags">
+                            
+                                Tags
+                            
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories">
+                            
+                                Categories
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<!-- Set your background image for this header in your post front-matter: cover -->
+
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>Android焦点搜索源码分析</h1>
+                    
+                    <span class="meta">
+                        <!-- Date and Author -->
+                        
+                        
+                            2020-10-12
+                        
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Tags and categories -->
+           
+                <div class="col-lg-4 col-lg-offset-2 col-md-5 col-md-offset-1 post-tags">
+                    
+                        
+
+
+<a href="/tags/TV/">#TV</a> <a href="/tags/焦点/">#焦点</a>
+
+
+                    
+                </div>
+                <div class="col-lg-4 col-md-5 post-categories">
+                    
+                        
+
+<a href="/categories/Android/">Android</a>
+
+                    
+                </div>
+            
+
+            <!-- Gallery -->
+            
+
+            <!-- Post Main Content -->
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <h2 id="一、Android焦点简介"><a href="#一、Android焦点简介" class="headerlink" title="一、Android焦点简介"></a>一、Android焦点简介</h2><p>与Android移动端触控交互方式不同，Android TV平台与用户的交互更多依赖遥控器加系统焦点来完成。焦点是Android系统对用户当前正在操作的可交互视图的一种标记，通常被焦点标记的视图通常都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，用户可以使用遥控器方向键将界面上不同的可交互视图标记为焦点。TV平台的APP开发维护无时无刻不在与焦点打交道，所以本文分析下源码中关于焦点流转，焦点状态变化相关的代码。<br><a id="more"></a></p>
+<p>对于焦点更详细的介绍，可以参考<a href="https://fanyangkong.github.io/2021/04/04/%E5%A4%A7%E8%AF%9DAndroid%E7%B3%BB%E7%BB%9F%E7%84%A6%E7%82%B9/">大话Android系统焦点</a>这篇分享，因为本文是对Android SDK 29中焦点转移逻辑部分源码的分析，Android焦点逻辑部分流程如下图所示：</p>
+<p><img src="/images/TV/system_focus_pure.png" alt></p>
+<h2 id="二、焦点转移流程分析"><a href="#二、焦点转移流程分析" class="headerlink" title="二、焦点转移流程分析"></a>二、焦点转移流程分析</h2><p>焦点转移逻辑是在<code>dispatchKeyEvent</code>分发完成后执行的，这部分的代码在<code>RootViewImpl#ViewPostImeInputStage</code>中。按键首先会依次经过<code>DecorView-&gt;Activity-&gt;ViewGroup-&gt;View</code>的顺序进行<code>dispatchKeyEvent</code>分发。如果分发过程中没有任何组件对按键进行消费，那么这个按键就会进入Android的焦点转移逻辑即<code>performFocusNavigation</code>中去。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">processKeyEvent</span><span class="params">(QueuedInputEvent q)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 省略部分代码</span></span><br><span class="line">	<span class="keyword">if</span> (mView.dispatchKeyEvent(event)) &#123;</span><br><span class="line">	    <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 省略部分代码</span></span><br><span class="line">	<span class="keyword">if</span> (event.getAction() == KeyEvent.ACTION_DOWN) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (groupNavigationDirection != <span class="number">0</span>) &#123;</span><br><span class="line">	        <span class="keyword">if</span> (performKeyboardGroupNavigation(groupNavigationDirection)) &#123;</span><br><span class="line">	            <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    	 <span class="comment">// 进行焦点处理</span></span><br><span class="line">	        <span class="keyword">if</span> (performFocusNavigation(event)) &#123;</span><br><span class="line">	            <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="performFocusNavigation"><a href="#performFocusNavigation" class="headerlink" title="performFocusNavigation"></a>performFocusNavigation</h3><p>Android原生的焦点转移逻辑针对了以下几种按键事件进行处理</p>
+<table>
+<thead>
+<tr>
+<th>KeyEvent CodeName</th>
+<th>Code</th>
+<th>遥控器/键盘</th>
+<th>方向 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KEYCODE_DPAD_UP</td>
+<td>19</td>
+<td>遥控器/键盘 上键</td>
+<td>View.FOCUS_UP</td>
+</tr>
+<tr>
+<td>KEYCODE_DPAD_DOWN</td>
+<td>20</td>
+<td>遥控器/键盘 下键</td>
+<td>View.FOCUS_DOWN</td>
+</tr>
+<tr>
+<td>KEYCODE_DPAD_LEFT</td>
+<td>21</td>
+<td>遥控器/键盘 左键</td>
+<td>View.FOCUS_LEFT</td>
+</tr>
+<tr>
+<td>KEYCODE_DPAD_RIGHT</td>
+<td>22</td>
+<td>遥控器/键盘 右键</td>
+<td>View.FOCUS_RIGHT</td>
+</tr>
+<tr>
+<td>KEYCODE_TAB</td>
+<td>61</td>
+<td>键盘Tab键</td>
+<td>View.FOCUS_FORWARD</td>
+</tr>
+<tr>
+<td>modifier + KEYCODE_TAB</td>
+<td>61</td>
+<td>键盘shift键+Tab键</td>
+<td>View.FOCUS_BACKWARD</td>
+</tr>
+</tbody>
+</table>
+<p>如果是以上类型按键的话，Android系统就会进入<code>performFocusNavigation</code>方法进行焦点的转移。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">performFocusNavigation</span><span class="params">(KeyEvent event)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (direction != <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">// 1. 首先找到当前界面上焦点</span></span><br><span class="line">		View focused = mView.findFocus();</span><br><span class="line">		<span class="keyword">if</span> (focused != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="comment">// 2. 根据当前焦点的位置搜索对应方向新的焦点视图</span></span><br><span class="line">		    View v = focused.focusSearch(direction);</span><br><span class="line">		    <span class="keyword">if</span> (v != <span class="keyword">null</span> &amp;&amp; v != focused) &#123;</span><br><span class="line">		        focused.getFocusedRect(mTempRect);</span><br><span class="line">		        <span class="keyword">if</span> (mView <span class="keyword">instanceof</span> ViewGroup) &#123;</span><br><span class="line">		            ((ViewGroup) mView).offsetDescendantRectToMyCoords(</span><br><span class="line">		                    focused, mTempRect);</span><br><span class="line">		            ((ViewGroup) mView).offsetRectIntoDescendantCoords(</span><br><span class="line">		                    v, mTempRect);</span><br><span class="line">		        &#125;</span><br><span class="line">		        <span class="comment">// 3. 新视图抢焦</span></span><br><span class="line">		        <span class="keyword">if</span> (v.requestFocus(direction, mTempRect)) &#123;</span><br><span class="line">		            playSoundEffect(SoundEffectConstants</span><br><span class="line">		                    .getContantForFocusDirection(direction));</span><br><span class="line">		            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">		        &#125;</span><br><span class="line">		    &#125;</span><br><span class="line">		</span><br><span class="line">		    <span class="comment">// Give the focused view a last chance to handle the dpad key.</span></span><br><span class="line">		    <span class="keyword">if</span> (mView.dispatchUnhandledMove(focused, direction)) &#123;</span><br><span class="line">		        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">		    &#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		    <span class="keyword">if</span> (mView.restoreDefaultFocus()) &#123;</span><br><span class="line">		        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">		    &#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关键部分的代码可以分为三步：</p>
+<ol>
+<li>首先找到当前界面上焦点 <code>mView.findFocus()</code></li>
+<li>根据当前焦点的位置搜索对应方向新的焦点视图 <code>focused.focusSearch(direction)</code></li>
+<li>新视图抢焦 <code>v.requestFocus(direction, mTempRect)</code></li>
+</ol>
+<h3 id="1-找到当前焦点"><a href="#1-找到当前焦点" class="headerlink" title="1. 找到当前焦点"></a>1. 找到当前焦点</h3><p><code>mView.findFocus()</code>的逻辑比较简单，如下图所示为某APP首页的视图树简化版：</p>
+<p><img src="/images/TV/ystjg_focus.jpg" alt></p>
+<p>因为焦点在Android视图树中就是通过一条引用链逐层标记出的视图，通过递归引用链，就可以很容易地找到当前界面上获焦视图的引用并返回。</p>
+<h3 id="2-搜索对应方向新的焦点视图"><a href="#2-搜索对应方向新的焦点视图" class="headerlink" title="2. 搜索对应方向新的焦点视图"></a>2. 搜索对应方向新的焦点视图</h3><p>焦点搜索操作是Android焦点转移过程的关键步骤，也是最复杂的步骤。在第1步获取到当前界面的焦点后，通过调用该视图对象的<code>View#focusSearch(direction)</code>方法开始搜索。该方法会在视图树中自下而上递归调用父容器的<code>ViewParent#focusSearch(View v, int direction)</code>方法，一直递归到界面的根容器<code>DecorView</code>。在递归过程中，每一层父容器都可以通过重写<code>ViewParent#focusSearch(View focused, int direction)</code>方法自定义焦点搜索逻辑，用于支持特殊的产品需求。</p>
+<p>当递归调用到根容器<code>DecorView</code>后，根容器会使用系统提供的焦点搜索辅助类<code>FocusFinder</code>进行焦点的搜索。<code>FocusFinder</code>是一个单例类，提供了用于焦点搜索的API。API需要的主要参数为：搜索的顶层父容器<code>root</code>，当前获焦的视图<code>focused</code>以及搜索方向<code>direction</code>，代码如下所示</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FocusFinder.java</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> View <span class="title">findNextFocus</span><span class="params">(ViewGroup root, View focused, Rect focusedRect, </span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">int</span> direction)</span> </span>&#123;</span><br><span class="line">    View next = <span class="keyword">null</span>;</span><br><span class="line">    ViewGroup effectiveRoot = getEffectiveRoot(root, focused);</span><br><span class="line">    <span class="comment">// a. 查找对应方向用户指定的目标View</span></span><br><span class="line">    <span class="keyword">if</span> (focused != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = findNextUserSpecifiedFocus(effectiveRoot, focused, direction);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (next != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">    ArrayList&lt;View&gt; focusables = mTempList;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// b. 通过计算的方式查找到下一个焦点视图</span></span><br><span class="line">        focusables.clear();</span><br><span class="line">        effectiveRoot.addFocusables(focusables, direction);</span><br><span class="line">        <span class="keyword">if</span> (!focusables.isEmpty()) &#123;</span><br><span class="line">            next = findNextFocus(effectiveRoot, focused, focusedRect, </span><br><span class="line">            		direction, focusables);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        focusables.clear();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为开发者可以在代码中直接指定每个视图在四个方向转移焦点的目标视图，所以注释a处<code>findNextUserSpecifiedFocus</code>方法就是在检查当前按键方向是否有开发者指定的目标焦点视图，以及目标焦点视图的有效性（是否可见，是否可获焦等）。如果找到了有效目标视图，就作为搜索结果返回，如果没找到有效视图，那么系统就只能通过注释b处的计算逻辑来得出一个最优的目标视图。视图位置的计算比较放到下一个章节进行单独的讲解，这里经过计算后得出界面上最佳位置的视图，搜索过程就到此结束了。</p>
+<h3 id="3-新视图抢焦"><a href="#3-新视图抢焦" class="headerlink" title="3. 新视图抢焦"></a>3. 新视图抢焦</h3><p>在<a href="https://fanyangkong.github.io/2021/04/04/%E5%A4%A7%E8%AF%9DAndroid%E7%B3%BB%E7%BB%9F%E7%84%A6%E7%82%B9/">大话Android系统焦点</a>一文中介绍过，Android建立了从界面视图树的根节点出发，逐级向下层容器/视图指向的引用链，引用链的末端指向的就是当前界面的焦点。焦点切换的本质就是新焦点引用链的建立和旧焦点引用链的销毁。第3步通过调用<code>View#requestFocus()</code>方法，进入焦点引用链的销毁和重建流程。</p>
+<p><code>requestFocus</code>方法会调用到视图内部的焦点状态处理方法<code>handleFocusGainInternal</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// View.java</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">handleFocusGainInternal</span><span class="params">(@FocusRealDirection <span class="keyword">int</span> direction, </span></span></span><br><span class="line"><span class="function"><span class="params">		Rect previouslyFocusedRect)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ((mPrivateFlags &amp; PFLAG_FOCUSED) == <span class="number">0</span>) &#123;</span><br><span class="line">        mPrivateFlags |= PFLAG_FOCUSED;</span><br><span class="line"></span><br><span class="line">        View oldFocus = (mAttachInfo != <span class="keyword">null</span>) ? getRootView().findFocus() </span><br><span class="line">        		: <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (mParent != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// a. 向父容器递归建立新的引用链</span></span><br><span class="line">            mParent.requestChildFocus(<span class="keyword">this</span>, <span class="keyword">this</span>);</span><br><span class="line">            updateFocusedInCluster(oldFocus, direction);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (mAttachInfo != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// b. 通知ViewTreeObserver全局焦点变化</span></span><br><span class="line">            mAttachInfo.mTreeObserver.dispatchOnGlobalFocusChange(</span><br><span class="line">            		oldFocus, <span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">		  <span class="comment">// c. 通知该视图获得焦点</span></span><br><span class="line">        onFocusChanged(<span class="keyword">true</span>, direction, previouslyFocusedRect);</span><br><span class="line">        refreshDrawableState();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>视图内部对于焦点状态的逻辑处理是先向父容器递归建立新的焦点引用链，然后通知ViewTreeObserver全局焦点状态的变化，最后通知视图自身焦点状态的变化。向父容器递归建立新的引用链会进入<code>ViewGroup#requestChildFocus</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ViewGroup.java</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">requestChildFocus</span><span class="params">(View child, View focused)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (getDescendantFocusability() == FOCUS_BLOCK_DESCENDANTS) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// a. 如果当前容器获焦，清理掉容器自身的焦点</span></span><br><span class="line">    <span class="keyword">super</span>.unFocus(focused);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (mFocused != child) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mFocused != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// b. 如果该容器的引用链指向别的子视图/容器，进行引用链的销毁</span></span><br><span class="line">            mFocused.unFocus(focused);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">		 <span class="comment">// c. 建立新的引用链</span></span><br><span class="line">        mFocused = child;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (mParent != <span class="keyword">null</span>) &#123;</span><br><span class="line">   		 <span class="comment">// d. 继续向父容器递归 </span></span><br><span class="line">        mParent.requestChildFocus(<span class="keyword">this</span>, focused);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为界面上的视图是以树的形式存在的，所以当新的获焦视图向父容器递归建立新的引用链时，递归一定会与旧的引用链相交，也就是代码中b注释对应的<code>mFocused != null</code>的情况，因为旧的引用链存在，所以才会非空。相交后先调用<code>ViewGroup#unFocus()</code>方法销毁旧的引用链，这样界面就只剩下一条新的引用链了。</p>
+<p><img src="/images/TV/ystjg_new_focus.jpg" alt></p>
+<p>旧引用链的销毁也代表着旧焦点由获焦状态转变为了未获焦状态。旧焦点与新焦点以及ViewTreeObserver接收焦点状态回调的顺序为：旧焦点回调onFocusChange失去焦焦点，ViewTreeObserver回调全局焦点变化OnGlobalFocusChange，新焦点回调onFocusChange获得焦点。至此，一次按键引起焦点转移的过程就结束了。</p>
+<h2 id="三、FocusFinder逻辑分析"><a href="#三、FocusFinder逻辑分析" class="headerlink" title="三、FocusFinder逻辑分析"></a>三、FocusFinder逻辑分析</h2><p><code>FocusFinder</code>是Android系统提供的用于辅助焦点转移计算的单例类。提供了两个主要的查找API如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public View findNextFocus(ViewGroup root, View focused, int direction)</span><br><span class="line">public View findNextFocusFromRect(ViewGroup root, Rect focusedRect, </span><br><span class="line">	int direction)</span><br></pre></td></tr></table></figure>
+<p>用于在容器<code>root</code>的子视图中查找出指定视图<code>focused</code>或者指定位置<code>focusedRect</code>在方向<code>direction</code>上的下一个获焦视图。本章节来分析<code>FocusFinder</code>是如何从<code>root</code>的子视图中查找出最合适位置的下一个视图来获得焦点。</p>
+<p>查找焦点的API最终会进入<code>findNextFocus</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> View <span class="title">findNextFocus</span><span class="params">(ViewGroup root, View focused, Rect focusedRect, </span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">int</span> direction)</span> </span>&#123;</span><br><span class="line">    View next = <span class="keyword">null</span>;</span><br><span class="line">    ViewGroup effectiveRoot = getEffectiveRoot(root, focused);</span><br><span class="line">    <span class="comment">// a. 查找对应方向用户指定的目标View</span></span><br><span class="line">    <span class="keyword">if</span> (focused != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = findNextUserSpecifiedFocus(effectiveRoot, focused, direction);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (next != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">    ArrayList&lt;View&gt; focusables = mTempList;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// b. 通过计算的方式查找到下一个焦点视图</span></span><br><span class="line">        focusables.clear();</span><br><span class="line">        effectiveRoot.addFocusables(focusables, direction);</span><br><span class="line">        <span class="keyword">if</span> (!focusables.isEmpty()) &#123;</span><br><span class="line">            next = findNextFocus(effectiveRoot, focused, focusedRect, </span><br><span class="line">            		direction, focusables);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        focusables.clear();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释a处的原理已经在上文进行了介绍，这里分析注释b处的逻辑流程。因为Android视图是以树的形式组织起来的，系统会先将<code>root</code>容器节点对应的视图树中所有的视图添加到一个临时列表中，用来与焦点视图依次比较。每个容器在将自己的子视图添加到列表前会临时对子视图排序，排序是利用<code>FocusFinder</code>的静态内部类<code>FocusSorter</code>来完成的。经过排序后子视图就按照坐标位置从上到下，从左到右的顺序添加到临时列表中，如果子视图是容器，那么会继续遍历容器内的子视图。</p>
+<h3 id="1-FORWARD，BACKWARD方向的焦点搜索"><a href="#1-FORWARD，BACKWARD方向的焦点搜索" class="headerlink" title="1. FORWARD，BACKWARD方向的焦点搜索"></a>1. FORWARD，BACKWARD方向的焦点搜索</h3><p>当root容器内所有符合条件的可获焦视图都添加到临时列表后，就可以与当前焦点进行位置比较从而选择出位置最佳的视图。上文提过的六种焦点转移方向中，<code>FOCUS_FORWARD</code>就是从排好序的临时列表中选择当前焦点下一个索引的视图作为转移的目标视图。而<code>FOCUS_BACKWARD</code>就是选择当前焦点上一个索引视图作为转移的目标视图，这两个方向的转移逻辑比较简单。</p>
+<h3 id="2-DOWN，UP，LEFT，RIGHT方向的焦点搜索"><a href="#2-DOWN，UP，LEFT，RIGHT方向的焦点搜索" class="headerlink" title="2. DOWN，UP，LEFT，RIGHT方向的焦点搜索"></a>2. DOWN，UP，LEFT，RIGHT方向的焦点搜索</h3><p>剩下四个方向的比较会进入以下方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">View <span class="title">findNextFocusInAbsoluteDirection</span><span class="params">(ArrayList&lt;View&gt; focusables, </span></span></span><br><span class="line"><span class="function"><span class="params">		ViewGroup root, View focused, Rect focusedRect, <span class="keyword">int</span> direction)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 省略部分代码</span></span><br><span class="line">    View closest = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> numFocusables = focusables.size();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numFocusables; i++) &#123;</span><br><span class="line">        View focusable = focusables.get(i);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// only interested in other non-root views</span></span><br><span class="line">        <span class="keyword">if</span> (focusable == focused || focusable == root) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// get focus bounds of other view in same coordinate system</span></span><br><span class="line">        focusable.getFocusedRect(mOtherRect);</span><br><span class="line">        root.offsetDescendantRectToMyCoords(focusable, mOtherRect);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (isBetterCandidate(direction, focusedRect, mOtherRect, mBestCandidateRect)) &#123;</span><br><span class="line">            mBestCandidateRect.set(mOtherRect);</span><br><span class="line">            closest = focusable;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> closest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于上下左右四个方向的比较，临时列表会被完整遍历一遍从而筛选出列表中位置最佳的视图。为了后文叙述方便，将当前循环过程中出现的位置最佳的视图称为桩位视图，将每次循环过程中临时赋值用于与桩位视图比较的视图成为挑战视图。</p>
+<p><strong>桩位视图：当前循环过程中出现的位置最佳的视图</strong></p>
+<p><strong>挑战视图：循环过程中从临时列表中取出的视图，用于与桩位进行比较的</strong></p>
+<p>桩位视图与挑战视图之间的优略是通过比较视图获焦区域来完成的，这部分代码在<code>isBetterCandidate()</code>方法中。<code>isBetterCandidate()</code>方法通过三个维度的比较来判定两个获焦区域<code>Rect</code>的优劣，代码如下所示。其中参数<code>source</code>是当前获焦视图的可获焦区域，参数<code>rect1</code>是当前挑战视图的可获焦区域，参数<code>rect2</code>是当前桩位视图的可获焦区域。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">isBetterCandidate</span><span class="params">(<span class="keyword">int</span> direction, Rect source, Rect rect1, Rect rect2)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// a. 基本条件</span></span><br><span class="line">    <span class="keyword">if</span> (!isCandidate(source, rect1, direction)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!isCandidate(source, rect2, direction)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// b. 异类位置关系的比较</span></span><br><span class="line">    <span class="keyword">if</span> (beamBeats(direction, source, rect1, rect2)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (beamBeats(direction, source, rect2, rect1)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// c. 通过加权计算得出最佳位置</span></span><br><span class="line">    <span class="keyword">return</span> (getWeightedDistanceFor(</span><br><span class="line">                    majorAxisDistance(direction, source, rect1),</span><br><span class="line">                    minorAxisDistance(direction, source, rect1))</span><br><span class="line">            &lt; getWeightedDistanceFor(</span><br><span class="line">                    majorAxisDistance(direction, source, rect2),</span><br><span class="line">                    minorAxisDistance(direction, source, rect2)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>返回true表示挑战视图比桩位视图位置更佳，可以让挑战视图称为新的桩位视图。返回false则表示桩位视图的位置更佳，可以继续将桩位视图与临时列表中的下一个视图进行比较。比较过程三个维度依次对应了<code>isCandidate</code>方法，<code>beamBeats</code>方法以及加权公式计算。下面依次对三个维度进行说明：</p>
+<p><strong>a. 基本条件</strong></p>
+<p><code>isCandidate()</code>方法是判断当前挑战视图能否替换掉桩位视图的基本条件，以<code>FOCUS_RIGHT</code>向右方向的按键为例，挑战视图需要满足视图位置位于当前获焦视图的右侧。因为临时列表中添加的视图可能是界面上所有的视图，并没有做位置校验，所以这一步就是将位置完全不符合预期的视图淘汰掉。具体的参数比较图示如下：</p>
+<p><img src="/images/TV/first_step.png" alt></p>
+<p>挑战视图和桩位视图在都满足了基本条件的情况下，Android又将两个视图与当前获焦视图的位置关系分为两类，以当前获焦视图沿焦点转移方向与两个视图区域是否有相交为分类依据。以水平方向（向左或者向右）转移焦点为例，与当前获焦视图相交与不相交的图示如下：</p>
+<p><img src="/images/TV/left_right_over.jpg" alt></p>
+<p>所以对于挑战视图和桩位视图来说，两者与当前焦点视图的位置可能存在以下四种情况。四种情况可以分成两种类型处理。</p>
+<p><img src="/images/TV/over_ship.jpg" alt></p>
+<p>如果挑战视图和桩位视图二者中只有一个与当前焦点视图在焦点搜索方向相交，那么会先进行<strong>b. 异类型位置关系的比较</strong>，如果二者都与当前焦点视图相交或者都不与当前焦点视图相交，那么会直接进行<strong>c. 同类型位置关系的比较</strong>。</p>
+<p><strong>b. 异类型位置关系的比较</strong></p>
+<p><code>beamBeats</code>方法代码如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">boolean beamBeats(int direction, Rect source, Rect rect1, Rect rect2) &#123;</span><br><span class="line">    final boolean rect1InSrcBeam = beamsOverlap(direction, source, rect1);</span><br><span class="line">    final boolean rect2InSrcBeam = beamsOverlap(direction, source, rect2);</span><br><span class="line"></span><br><span class="line">    // if rect1 isn&apos;t exclusively in the src beam, it doesn&apos;t win</span><br><span class="line">    if (rect2InSrcBeam || !rect1InSrcBeam) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // we know rect1 is in the beam, and rect2 is not</span><br><span class="line"></span><br><span class="line">    // if rect1 is to the direction of, and rect2 is not, rect1 wins.</span><br><span class="line">    // for example, for direction left, if rect1 is to the left of the source</span><br><span class="line">    // and rect2 is below, then we always prefer the in beam rect1, since rect2</span><br><span class="line">    // could be reached by going down.</span><br><span class="line">    if (!isToDirectionOf(direction, source, rect2)) &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // for horizontal directions, being exclusively in beam always wins</span><br><span class="line">    if ((direction == View.FOCUS_LEFT || direction == View.FOCUS_RIGHT)) &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;        </span><br><span class="line"></span><br><span class="line">    // for vertical directions, beams only beat up to a point:</span><br><span class="line">    // now, as long as rect2 isn&apos;t completely closer, rect1 wins</span><br><span class="line">    // e.g for direction down, completely closer means for rect2&apos;s top</span><br><span class="line">    // edge to be closer to the source&apos;s top edge than rect1&apos;s bottom edge.</span><br><span class="line">    return (majorAxisDistance(direction, source, rect1)</span><br><span class="line">            &lt; majorAxisDistanceToFarEdge(direction, source, rect2));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对<code>beamBeats</code>方法的两次调用会确保在该方法的判断分支中，参数<code>rect1</code>代表的是与当前焦点视图相交的视图，而参数<code>rect2</code>代表的是没有与当前焦点视图相交的视图。对于异类型位置关系的两个视图：</p>
+<p> (1) 如果是左右方向的焦点搜索，那么认为与当前焦点位置相交的视图优于未相交的视图，因为未相交的视图通常可以使用上下方向按键来进行焦点转移。</p>
+<p> (2) 如果是上下方向的焦点搜索，未相交的视图还有一线生机。就是未相交的视图在水平或者竖直方向都不与当前获焦视图相交。这种情况下只能通过(3)计算得出优劣结果。</p>
+<p> (3) 计算，通过以下公式比较计算结果，返回true代表挑战视图和桩位视图中与当前焦点相交的视图更优，返回false进入<strong>c. 同类型位置关系的比较</strong>，给挑战视图最后的机会。<br> <code>(majorAxisDistance(direction, source, rect1) &lt; majorAxisDistanceToFarEdge(direction, source, rect2))</code></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:center">majorAxisDistance (&gt;=0)</th>
+<th style="text-align:center">majorAxisDistanceToFarEdge (&gt;=1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">FOCUS_LEFT</td>
+<td style="text-align:center">source.left - dest.right</td>
+<td style="text-align:center">source.left - dest.left</td>
+</tr>
+<tr>
+<td style="text-align:left">FOCUS_RIGHT</td>
+<td style="text-align:center">dest.left - source.right</td>
+<td style="text-align:center">dest.right - source.right</td>
+</tr>
+<tr>
+<td style="text-align:left">FOCUS_UP</td>
+<td style="text-align:center">source.top - dest.bottom</td>
+<td style="text-align:center">source.top - dest.top</td>
+</tr>
+<tr>
+<td style="text-align:left">FOCUS_DOWN</td>
+<td style="text-align:center">dest.top - source.bottom</td>
+<td style="text-align:center">dest.bottom - source.bottom</td>
+</tr>
+</tbody>
+</table>
+<p><strong>c. 同类型位置关系的比较</strong></p>
+<p>进入这里的判断一种情况是两个比较的视图是同类型位置关系，要么是两个异类型位置关系的视图在<strong>b. 异类型位置关系的比较</strong>通过计算的方式比较失败了。但<strong>b. 异类型位置关系的比较</strong>的计算只是普通的单方向距离计算，而这一步的计算考虑了水平和竖直两个方向的间距，并且对搜索方向的间距进行了加权。上公式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(getWeightedDistanceFor(</span><br><span class="line">		majorAxisDistance(direction, source, rect1),</span><br><span class="line">		minorAxisDistance(direction, source, rect1))</span><br><span class="line">			&lt; getWeightedDistanceFor(</span><br><span class="line">					majorAxisDistance(direction, source, rect2),</span><br><span class="line">					minorAxisDistance(direction, source, rect2)));</span><br></pre></td></tr></table></figure>
+<p>参数<code>rect1</code>是当前挑战视图的可获焦区域，参数<code>rect2</code>是当前桩位视图的可获焦区域。<code>majorAxisDistance</code>是焦点搜索方向的距离计算，计算方式已经在上表中列出，<code>minorAxisDistance</code>是视图中心点与当前获焦视图中心点在垂直于焦点搜索方向的距离，<code>13</code>是加权倍数，由系统默认指定。为了便于理解下图展示了向右方向搜索的<code>majorAxisDistance</code>与<code>minorAxisDistance</code>的关系。</p>
+<p><img src="/images/TV/third_step.png" alt></p>
+<p>分别计算出挑战视图与桩位视图的值后，以值小的视图作为新的桩位，而所有的挑战视图都与桩位视图比较结束后，桩位视图就成了焦点搜索返回的最终结果，至此<code>FocusFinder</code>内部的搜索逻辑就结束了。</p>
+<h3 id="3-小结"><a href="#3-小结" class="headerlink" title="3. 小结"></a>3. 小结</h3><p>系统在进行焦点转移时，多数需要关心的逻辑都在这一小节涵盖的代码中。首先是基本条件决定待选视图在整体上是符合用户方向键的预期的，然后对处于异类型位置的视图进行了比较，最后对处于同类型位置的视图进行了比较。因此当我们发现焦点转移与预期不符时，基本都是因为这一小节的某个分支导致预期的目标视图被淘汰掉了，可以针对性的断点调试定位。</p>
+<h2 id="四、系统焦点转移的干预"><a href="#四、系统焦点转移的干预" class="headerlink" title="四、系统焦点转移的干预"></a>四、系统焦点转移的干预</h2><p>结合系统焦点流转的流程图与上文的代码分析，可以找到开发者可以干预焦点转移过程的四个关键点：</p>
+<ol>
+<li>按键发生时，系统的焦点搜索是在方向按键未被处理时才会进行的，换句话说，如果在<code>dispatchKeyEvent</code>按键处理阶段人为的让其它视图获取焦点，就不会进入后续的焦点搜索与转移阶段。</li>
+<li>从焦点向父容器递归的过程中，<code>focusSearch</code>方法会从当前获焦视图一直递归调用到页面的根视图，可以重写容器的<code>focusSearch</code>方法来进行干预并且返回自己预期的视图。</li>
+<li>视图树在添加到临时列表时，会自上而下依次询问每个容器要添加的子视图，所以可以重写<code>addFocusables</code>方法只添加自己允许获焦的视图，没有添加到临时列表里的视图不会被考虑和计算。</li>
+<li>在坐标计算过程中，需要获取每个视图的坐标块时，因此可以重写视图的<code>getFocusedRect</code>方法返回自定义的坐标块大小。</li>
+</ol>
+<p>前两个关键点的干预相当于开发者接管了系统焦点流转的过程，而后两个关键点的干预是修改了系统焦点搜索过程的部分参数。需要注意的是，在前两个关键点干预焦点流转，会无法进入系统焦点转移的流程，而系统在每次焦点转移流程后都会播放按键音以增加用户体验。所以当你发现家里的遥控器在TV上某些APP内按键音时断时续，你就知道开发者在这里动了手脚。</p>
+
+
+                
+            </div>
+
+            <!-- Comments -->
+            
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+
+
+                </div>
+            
+        </div>
+    </div>
+</article>
+
+    <!-- Footer -->
+    <hr>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+
+                    
+
+                    
+                        <li>
+                            <a href="https://github.com/fanyangkong" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    
+
+                    
+
+                    
+
+                    
+                </ul>
+                <p class="copyright text-muted">&copy; 2021 fanyangkong<br></p>
+                <p class="copyright text-muted">Original Theme <a target="_blank" href="http://startbootstrap.com/template-overviews/clean-blog/">Clean Blog</a> from <a href="http://startbootstrap.com/" target="_blank">Start Bootstrap</a></p>
+                <p class="copyright text-muted">Adapted for <a target="_blank" href="https://hexo.io/">Hexo</a> by <a href="http://www.codeblocq.com/" target="_blank">Jonathan Klughertz</a></p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+    <!-- After footer scripts -->
+    
+<!-- jQuery -->
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<!-- Gallery -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/featherlight/1.3.5/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>
