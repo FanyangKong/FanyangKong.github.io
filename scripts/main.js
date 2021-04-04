@@ -2557,38 +2557,38 @@ var SidebarMeta = /*#__PURE__*/function () {
       this._tryInitMetas();
     } // fetch content.json
 
-  }, {
-    key: "_fetchInfo",
-    value: function _fetchInfo() {
-      // siteMeta is from js-info.ejs
-      var contentURL = siteMeta.root + 'content.json?t=' + Number(new Date());
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = '';
-      xhr.open('get', contentURL, true);
-      var $loadFailed = $('.tag-load-fail');
-      var that = this;
+  // }, {
+  //   key: "_fetchInfo",
+  //   value: function _fetchInfo() {
+  //     // siteMeta is from js-info.ejs
+  //     var contentURL = siteMeta.root + 'content.json?t=' + Number(new Date());
+  //     var xhr = new XMLHttpRequest();
+  //     xhr.responseType = '';
+  //     xhr.open('get', contentURL, true);
+  //     var $loadFailed = $('.tag-load-fail');
+  //     var that = this;
 
-      xhr.onload = function () {
-        if (this.status === 200 || this.status === 304) {
-          $loadFailed.remove(); // defensive programming if content.json formart is not correct
-          // pr: https://github.com/fi3ework/hexo-theme-archer/pull/37
+  //     xhr.onload = function () {
+  //       if (this.status === 200 || this.status === 304) {
+  //         $loadFailed.remove(); // defensive programming if content.json formart is not correct
+  //         // pr: https://github.com/fi3ework/hexo-theme-archer/pull/37
 
-          var contentJSON;
-          var posts;
-          contentJSON = JSON.parse(this.responseText);
-          posts = (0, _util2.isArray)(contentJSON) ? contentJSON : contentJSON.posts;
+  //         var contentJSON;
+  //         var posts;
+  //         contentJSON = JSON.parse(this.responseText);
+  //         posts = (0, _util2.isArray)(contentJSON) ? contentJSON : contentJSON.posts;
 
-          if (posts && posts.length) {
-            that.postsArr = posts;
-            that.emitter.emit('DATA_FETCHED_SUCCESS');
-          }
-        } else {
-          this.$currPostsContainer.remove();
-        }
-      };
+  //         if (posts && posts.length) {
+  //           that.postsArr = posts;
+  //           that.emitter.emit('DATA_FETCHED_SUCCESS');
+  //         }
+  //       } else {
+  //         this.$currPostsContainer.remove();
+  //       }
+  //     };
 
-      xhr.send();
-    }
+  //     xhr.send();
+  //   }
   }, {
     key: "_bindOtherClick",
     value: function _bindOtherClick() {
