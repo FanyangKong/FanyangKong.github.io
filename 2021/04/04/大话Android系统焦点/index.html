@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="TV,焦点,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. 为什么会存在系统焦点我们平常可以接触到的电子设备，从交互方式上可以分为两大类：触控设备与非触控设备。触控设备依赖一块触摸屏可以让用户轻松的实现对系统的控制，而非触控设备想要操控系统，则需要依赖设备上的实体指令按键。对于Android系统来说，焦点就是软件层面用于配合实体按键实现非触控设备交互控制的关键。焦点是系统对用户当前正在操作的可交互内容的一种标记。通常被焦点标记的内容都会以一种差异化的">
+<meta name="keywords" content="TV,焦点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大话Android系统焦点">
+<meta property="og:url" content="http://fanyangkong.github.io/2021/04/04/大话Android系统焦点/index.html">
+<meta property="og:site_name" content="Fanyang&#39;s Blog">
+<meta property="og:description" content="1. 为什么会存在系统焦点我们平常可以接触到的电子设备，从交互方式上可以分为两大类：触控设备与非触控设备。触控设备依赖一块触摸屏可以让用户轻松的实现对系统的控制，而非触控设备想要操控系统，则需要依赖设备上的实体指令按键。对于Android系统来说，焦点就是软件层面用于配合实体按键实现非触控设备交互控制的关键。焦点是系统对用户当前正在操作的可交互内容的一种标记。通常被焦点标记的内容都会以一种差异化的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/camera_switch.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/android_view.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/app_home.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/ystjg_view.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/ystjg_focus.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/ystjg_new_focus.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/system_focus.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/focus_unfocus.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/poster_element.png">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/scroll.gif">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/phone_player.jpg">
+<meta property="og:image" content="http://fanyangkong.github.io/images/TV/tv_player.png">
+<meta property="og:updated_time" content="2021-04-04T10:36:14.071Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大话Android系统焦点">
+<meta name="twitter:description" content="1. 为什么会存在系统焦点我们平常可以接触到的电子设备，从交互方式上可以分为两大类：触控设备与非触控设备。触控设备依赖一块触摸屏可以让用户轻松的实现对系统的控制，而非触控设备想要操控系统，则需要依赖设备上的实体指令按键。对于Android系统来说，焦点就是软件层面用于配合实体按键实现非触控设备交互控制的关键。焦点是系统对用户当前正在操作的可交互内容的一种标记。通常被焦点标记的内容都会以一种差异化的">
+<meta name="twitter:image" content="http://fanyangkong.github.io/images/TV/camera_switch.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://fanyangkong.github.io/2021/04/04/大话Android系统焦点/">
+
+
+
+
+
+  <title>大话Android系统焦点 | Fanyang's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fanyang's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">再挣扎下</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://fanyangkong.github.io/2021/04/04/大话Android系统焦点/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fanyangkong">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/10181034?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fanyang's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">大话Android系统焦点</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-04T00:25:36+08:00">
+                2021-04-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-为什么会存在系统焦点"><a href="#1-为什么会存在系统焦点" class="headerlink" title="1. 为什么会存在系统焦点"></a>1. 为什么会存在系统焦点</h2><p>我们平常可以接触到的电子设备，从交互方式上可以分为两大类：触控设备与非触控设备。触控设备依赖一块触摸屏可以让用户轻松的实现对系统的控制，而非触控设备想要操控系统，则需要依赖设备上的实体指令按键。对于Android系统来说，焦点就是软件层面用于配合实体按键实现非触控设备交互控制的关键。焦点是系统对用户当前正在操作的可交互内容的一种标记。通常被焦点标记的内容都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，可以使用方向键将界面上不同的可交互内容标记为焦点，实现非触控设备对软件的精确控制。<br><a id="more"></a></p>
+<p><img src="/images/TV/camera_switch.jpg" alt></p>
+<p>上图左为相机，通过方向键移动焦点选择不同的功能菜单；上图右为Switch游戏机，通过手柄移动焦点选择不同的游戏</p>
+<p>本文以Android阵营非触控设备平台——TV平台为例，结合国内知名视频平台TV端APP的一些交互与开发实践，讲述Android系统焦点是如何运作的。要注意的是，焦点的处理逻辑是Android系统中一套统一的逻辑，并不是TV平台的独立特性。在移动端的开发过程中也会使用到焦点相关的内容，例如让输入框获焦从而弹出系统软键盘。在TV平台上焦点是用户交互的基础，所以理解焦点流转的原理就变得尤为重要。本文主要介绍Android系统焦点，对于系统焦点更深入的源码分析可以关注后续的文章。</p>
+<h2 id="2-Android界面是如何构成的"><a href="#2-Android界面是如何构成的" class="headerlink" title="2. Android界面是如何构成的"></a>2. Android界面是如何构成的</h2><p>我们平常所看到的丰富的Android界面，是由不同的控件组合构成的，这些控件可以分为两大类——视图（View）和容器（ViewGroup）。视图是Android系统中可交互的最小单元，不同类型的视图用于展示不同的图像、文本或者动画等。而容器是一种特殊的视图，虽然容器也具有视图的能力，但容器更侧重于构建视图之间的布局约束关系。开发者利用不同的容器和视图还原设计稿中要求的样式，不同的样式最终组合成为一个界面。每个界面内的所有容器和视图以一颗树的形式存在，并最终渲染成为用户所看到的丰富的界面。</p>
+<p><img src="/images/TV/android_view.jpg" alt></p>
+<p>以该APP的首页为例，界面显示的元素如下图所示：</p>
+<p><img src="/images/TV/app_home.jpg" alt></p>
+<ul>
+<li>状态栏：搜索按钮、登录按钮、语音按钮等等</li>
+<li>导航栏：“我的”按钮，“频道”按钮，“短视频”按钮以及其它频道按钮</li>
+<li>内容区：主要包含了各种各样的视频海报与按钮</li>
+</ul>
+<p>这些显示内容对应的视图树如下所示：</p>
+<p><img src="/images/TV/ystjg_view.jpg" alt></p>
+<p>整颗视图树是以<code>DecorView</code>作为根节点建立的，这是Android系统每个界面的默认根节点实现。然后依次包含了导航栏容器节点，内容区容器节点，状态栏容器节点。每个容器又包含了相应的子视图。其中<code>MenuView</code>代表了界面上的频道按钮：“我的”，“频道”，“短视频”，“精选”等等；<code>StatusItem</code>代表了界面上的状态栏按钮：”搜索“，”登录“，”语音“等等；<code>PosterView</code>代表了界面上的海报图。实际界面的视图树与视图种类比这里要复杂很多，这里只是简化做了显示。</p>
+<h2 id="3-焦点是如何产生与流转的"><a href="#3-焦点是如何产生与流转的" class="headerlink" title="3. 焦点是如何产生与流转的"></a>3. 焦点是如何产生与流转的</h2><p>在Android系统中，视图树中的任意一个节点都可以成为焦点。Android建立了从视图树的根节点出发，逐级向下层容器/视图指向的引用链，引用链的末端指向的就是当前界面的焦点。如下图所示：</p>
+<p><img src="/images/TV/ystjg_focus.jpg" alt></p>
+<p>当用户按下方向键，引用链可以被销毁并重建来指向新的焦点视图/容器。被引用链的终点指向的视图将成为页面的新焦点，该视图也将成为获焦状态；而失去引用链指向的视图/容器将失去焦点状态。</p>
+<p><img src="/images/TV/ystjg_new_focus.jpg" alt></p>
+<p>我们对于界面上焦点从一个视图转移到另一个视图的直观体验，本质上就是视图树中一个新的节点替代旧节点成为了界面的焦点。成为新焦点的视图会展示出开发者预设的获焦状态UI，从而给用户体验上的焦点转移的效果。</p>
+<p>Android系统在发生按键事件后，会以当前焦点的坐标位置为基准，遍历视图树中每个视图的坐标来计算选择位置最合适的视图作为下一个焦点。视图确定后通过调用requestFocus方法就会重建视图树中的焦点引用链，使其指向新的焦点视图，也就完成了焦点的此次流转。焦点引用链的重建过程是从目标视图开始自下而上进行递归创建的，当新引用链递归到与旧引用链相交后，会先将旧的引用链清理掉，然后继续建立新的引用链直到根容器。焦点转移的流程如下图所示：</p>
+<p><img src="/images/TV/system_focus.jpg" alt></p>
+<p>具体的比较算法将在后续的文章中进行介绍，这里结合系统焦点流转的流程图说一下图中标记的四个开发者可以干预焦点转移过程的关键点：</p>
+<ol>
+<li>按键发生时，系统的焦点搜索是在方向按键未被处理时才会进行的，换句话说，如果在按键处理阶段人为的将其它视图设为焦点，就不会进入后续的焦点搜索与转移阶段。</li>
+<li>从焦点向父容器递归的过程中，focusSearch方法会从当前获焦视图一直递归调用到页面的根视图，可以重写容器的focusSearch方法来进行干预并且返回自己预期的视图。</li>
+<li>视图树在添加到临时列表时，会自上而下依次询问每个容器要添加的子视图，所以可以重写addFocusables方法只添加自己允许获焦的视图，没有添加到临时列表里的视图不会被考虑和计算。</li>
+<li>在坐标计算过程中，需要获取每个视图的坐标块时，因此可以重写视图的getFocusedRect方法返回自定义的坐标块大小。</li>
+</ol>
+<p>前两个关键点的干预相当于开发者接管了系统焦点流转的过程，而后两个关键点的干预是修改了系统焦点搜索过程的部分参数。需要注意的是，在前两个关键点干预焦点流转，会无法进入系统焦点转移的流程，而系统在每次焦点转移流程后都会播放按键音以增加用户体验。所以当你发现家里的遥控器在TV上某些APP内按键音时断时续，你就知道开发者在这里动了手脚。</p>
+<h2 id="4-TV焦点交互模式对开发的改变"><a href="#4-TV焦点交互模式对开发的改变" class="headerlink" title="4. TV焦点交互模式对开发的改变"></a>4. TV焦点交互模式对开发的改变</h2><h3 id="4-1-组件对多状态UI的维护"><a href="#4-1-组件对多状态UI的维护" class="headerlink" title="4.1 组件对多状态UI的维护"></a>4.1 组件对多状态UI的维护</h3><p>为了更明确的告知用户当前界面上焦点所指向的视图，通常被指向的视图都会以另一种UI样式展示出来。APP里对于所有需要与用户交互的元素，在提供设计稿时都需要明确视图在获焦态与非获焦态下两种不同的样式。常见的获焦样式包括放大元素，增加边框，改变背景色，改变图片，改变字体颜色大小位置，以及增加闪光动画，缩放动画等等如下所示。</p>
+<p><img src="/images/TV/focus_unfocus.jpg" alt></p>
+<p>每种可交互视图在获焦状态发生变化时都会在两种UI样式间切换，良好设计的获焦态与非获焦态变化可以让用户清晰地掌握焦点在界面上的移动轨迹，减少用户的困扰。相较于移动端APP，同样的显示内容在TV端需要对两种获焦状态下的UI视觉稿的进行还原（这里不讨论选中态等其它状态）。以一张TV上的竖屏海报为例，获焦态与非获焦态需要显示的元素分别如下所示：</p>
+<p><img src="/images/TV/poster_element.png" alt></p>
+<p>海报容器内的每个显示元素都意味着需要使用一个视图来承载，并在两种状态切换时隐藏/显示相应的视图，启动相应的动画。</p>
+<h3 id="4-2-焦点对于触控拖拽体验的模拟"><a href="#4-2-焦点对于触控拖拽体验的模拟" class="headerlink" title="4.2 焦点对于触控拖拽体验的模拟"></a>4.2 焦点对于触控拖拽体验的模拟</h3><p>基于Android系统焦点产生的交互方式，除了能够实现移动端的点击操作体验，还能完成列表滚动的交互。但TV端的列表滚动交互与手机端直接拖拽列表的体验不同，TV端通过焦点视图的获焦态变化触发列表进行自动滚动。目前谷歌在support.v17.leanback包中提供了部分组件用于支持TV端的客户端开发，其中的BaseGridView在Recyclerview的基础上增加了对焦点与滚动相关的支持。通过焦点的切换触发列表滚动在BaseGridView中共提供了三种滚动模式：</p>
+<ul>
+<li><code>FOCUS_SCROLL_ALIGNED</code> 模式：始终将获焦视图保持在对齐位置。这也是目前云视听使用最多的滚动方式，让获焦的视图始终保持在列表的中间线位置。</li>
+<li><code>FOCUS_SCROLL_ITEM</code> 模式：获焦视图在列表显示区域以外时，滚动视图到列表显示区域内。</li>
+<li><code>FOCUS_SCROLL_PAGE</code> 模式：当获焦视图在列表显示区域外时，滚动到下一页内容。</li>
+</ul>
+<p>TV端APP采用最多的焦点居中滚动模式如下图所示：</p>
+<p><img src="/images/TV/scroll.gif" alt></p>
+<h3 id="4-3-焦点在界面上的流转与维护"><a href="#4-3-焦点在界面上的流转与维护" class="headerlink" title="4.3 焦点在界面上的流转与维护"></a>4.3 焦点在界面上的流转与维护</h3><p>这里的焦点流转处理一部分来源于产品的诉求，Android系统的原生焦点流转逻辑肯定无法满足所有的产品诉求，很容易出现在焦点流转路径与预期不符的情况，这时主要的干预手段就是在上文提到的四个关键点，或者能够说服产品接受。</p>
+<p>另一部分则来源于APP内的控制逻辑。因为并不是所有的交互场景都可以依赖于系统的焦点搜索转移就可以完成的，最明显的例子就是焦点在全屏播放器内部的控制逻辑。在触控模式下，用户可以直接触达每一个播放器内的可交互视图组件，从而使用相应的功能。而非触控模式下，全屏播放器中只有当前获得焦点的视图组件可以接收按键的输入（主要是确认键触发的点击）。</p>
+<p><img src="/images/TV/phone_player.jpg" alt></p>
+<p>上图为移动端全屏播放器，用户可以直接点击界面上的任意功能组件</p>
+<p><img src="/images/TV/tv_player.png" alt></p>
+<p>上图为TV端全屏播放器，只有当前获得焦点的组件才可以接收点击事件</p>
+<p>全屏播放器下的焦点保持与流转仅依靠系统的焦点分发策略是无法完成的，因此播放器内的焦点需要开发人员自己进行控制流转。全屏状态下播放器内可交互的组件包括：广告，登录按钮，一级菜单，二级菜单，剧集列表，少儿闹钟，错误反馈等等，这些可交互的组件有的可以同时出现在屏幕中，有的相互之间存在互斥关系。组件的显示与消失，焦点的流转与保持，是TV端与移动端开发明显的不同点。</p>
+<h2 id="5-写在最后"><a href="#5-写在最后" class="headerlink" title="5. 写在最后"></a>5. 写在最后</h2><p>TV平台的开发者在Android群体中占比相对较少，并且相比于触屏模式，非触控模式交互方式的局限性更大。本文旨在向非Android TV平台开发者，甚至是非开发人员科普TV上的焦点流转的部分内容。如果对焦点流转过程中的源码感兴趣可以关注后续的文章介绍。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/TV/" rel="tag"># TV</a>
+          
+            <a href="/tags/焦点/" rel="tag"># 焦点</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/12/Android焦点搜索源码分析/" rel="next" title="Android焦点搜索源码分析">
+                <i class="fa fa-chevron-left"></i> Android焦点搜索源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/10181034?s=460&v=4" alt="fanyangkong">
+            
+              <p class="site-author-name" itemprop="name">fanyangkong</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/FanyangKong" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-为什么会存在系统焦点"><span class="nav-number">1.</span> <span class="nav-text">1. 为什么会存在系统焦点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Android界面是如何构成的"><span class="nav-number">2.</span> <span class="nav-text">2. Android界面是如何构成的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-焦点是如何产生与流转的"><span class="nav-number">3.</span> <span class="nav-text">3. 焦点是如何产生与流转的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-TV焦点交互模式对开发的改变"><span class="nav-number">4.</span> <span class="nav-text">4. TV焦点交互模式对开发的改变</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-组件对多状态UI的维护"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 组件对多状态UI的维护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-焦点对于触控拖拽体验的模拟"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 焦点对于触控拖拽体验的模拟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-焦点在界面上的流转与维护"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 焦点在界面上的流转与维护</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-写在最后"><span class="nav-number">5.</span> <span class="nav-text">5. 写在最后</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fanyangkong</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
