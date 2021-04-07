@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://fanyangkong.github.io/images/TV/left_right_over.jpg">
 <meta property="og:image" content="http://fanyangkong.github.io/images/TV/over_ship.jpg">
 <meta property="og:image" content="http://fanyangkong.github.io/images/TV/third_step.png">
-<meta property="og:updated_time" content="2021-04-04T11:03:46.569Z">
+<meta property="og:updated_time" content="2021-04-07T14:48:31.763Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android焦点搜索源码分析">
 <meta name="twitter:description" content="一、Android焦点简介与Android移动端触控交互方式不同，Android TV平台与用户的交互更多依赖遥控器加系统焦点来完成。焦点是Android系统对用户当前正在操作的可交互视图的一种标记，通常被焦点标记的视图通常都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，用户可以使用遥控器方向键将界面上不同的可交互视图标记为焦点。TV平台的APP开发维护无时无刻不在与焦点打交道，所以">
@@ -416,7 +416,7 @@ height:50vh;
             <main class="main post-page">
     <article class="article-entry">
         <h2 id="一、Android焦点简介"><a href="#一、Android焦点简介" class="headerlink" title="一、Android焦点简介"></a>一、Android焦点简介</h2><p>与Android移动端触控交互方式不同，Android TV平台与用户的交互更多依赖遥控器加系统焦点来完成。焦点是Android系统对用户当前正在操作的可交互视图的一种标记，通常被焦点标记的视图通常都会以一种差异化的UI样式展示出来。每个界面只会存在一个焦点，用户可以使用遥控器方向键将界面上不同的可交互视图标记为焦点。TV平台的APP开发维护无时无刻不在与焦点打交道，所以本文分析下源码中关于焦点流转，焦点状态变化相关的代码。<br><a id="more"></a></p>
-<p>对于焦点更详细的介绍，可以参考<a href="https://fanyangkong.github.io/2021/04/04/%E5%A4%A7%E8%AF%9DAndroid%E7%B3%BB%E7%BB%9F%E7%84%A6%E7%82%B9/">大话Android系统焦点</a>这篇分享，因为本文是对Android SDK 29中焦点转移逻辑部分源码的分析，Android焦点逻辑部分流程如下图所示：</p>
+<p>对于焦点更详细的介绍，可以参考<a href="https://fanyangkong.github.io/2020/10/09/%E5%A4%A7%E8%AF%9DAndroid%E7%B3%BB%E7%BB%9F%E7%84%A6%E7%82%B9/">大话Android系统焦点</a>这篇分享，因为本文是对Android SDK 29中焦点转移逻辑部分源码的分析，Android焦点逻辑部分流程如下图所示：</p>
 <p><img src="/images/TV/system_focus_pure.png" alt></p>
 <h2 id="二、焦点转移流程分析"><a href="#二、焦点转移流程分析" class="headerlink" title="二、焦点转移流程分析"></a>二、焦点转移流程分析</h2><p>焦点转移逻辑是在<code>dispatchKeyEvent</code>分发完成后执行的，这部分的代码在<code>RootViewImpl#ViewPostImeInputStage</code>中。按键首先会依次经过<code>DecorView-&gt;Activity-&gt;ViewGroup-&gt;View</code>的顺序进行<code>dispatchKeyEvent</code>分发。如果分发过程中没有任何组件对按键进行消费，那么这个按键就会进入Android的焦点转移逻辑即<code>performFocusNavigation</code>中去。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">processKeyEvent</span><span class="params">(QueuedInputEvent q)</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 省略部分代码</span></span><br><span class="line">	<span class="keyword">if</span> (mView.dispatchKeyEvent(event)) &#123;</span><br><span class="line">	    <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 省略部分代码</span></span><br><span class="line">	<span class="keyword">if</span> (event.getAction() == KeyEvent.ACTION_DOWN) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (groupNavigationDirection != <span class="number">0</span>) &#123;</span><br><span class="line">	        <span class="keyword">if</span> (performKeyboardGroupNavigation(groupNavigationDirection)) &#123;</span><br><span class="line">	            <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    	 <span class="comment">// 进行焦点处理</span></span><br><span class="line">	        <span class="keyword">if</span> (performFocusNavigation(event)) &#123;</span><br><span class="line">	            <span class="keyword">return</span> FINISH_HANDLED;</span><br><span class="line">	        &#125;</span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -830,13 +830,13 @@ top:50vh;
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
     
-        <span class="sidebar-tag-name" data-tags="Java"><span class="iconfont-archer">&#xe606;</span>Java</span>
-    
-        <span class="sidebar-tag-name" data-tags="Enum"><span class="iconfont-archer">&#xe606;</span>Enum</span>
-    
         <span class="sidebar-tag-name" data-tags="python"><span class="iconfont-archer">&#xe606;</span>python</span>
     
         <span class="sidebar-tag-name" data-tags="pyenv"><span class="iconfont-archer">&#xe606;</span>pyenv</span>
+    
+        <span class="sidebar-tag-name" data-tags="Java"><span class="iconfont-archer">&#xe606;</span>Java</span>
+    
+        <span class="sidebar-tag-name" data-tags="Enum"><span class="iconfont-archer">&#xe606;</span>Enum</span>
     
         <span class="sidebar-tag-name" data-tags="Android"><span class="iconfont-archer">&#xe606;</span>Android</span>
     
@@ -879,13 +879,13 @@ jsonContent:
         <div class="sidebar-panel-categories">
     <div class="sidebar-categories-name">
     
-        <span class="sidebar-category-name" data-categories="Java"><span class="iconfont-archer">&#xe60a;</span>Java</span>
-    
         <span class="sidebar-category-name" data-categories="python"><span class="iconfont-archer">&#xe60a;</span>python</span>
     
-        <span class="sidebar-category-name" data-categories="Android"><span class="iconfont-archer">&#xe60a;</span>Android</span>
+        <span class="sidebar-category-name" data-categories="Java"><span class="iconfont-archer">&#xe60a;</span>Java</span>
     
         <span class="sidebar-category-name" data-categories="git"><span class="iconfont-archer">&#xe60a;</span>git</span>
+    
+        <span class="sidebar-category-name" data-categories="Android"><span class="iconfont-archer">&#xe60a;</span>Android</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
